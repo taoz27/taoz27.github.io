@@ -1,9 +1,11 @@
 (function(window){
 
+	// 随机函数
     function random(min, max) {
         return min + Math.floor(Math.random() * (max - min + 1));
     }
 
+	// 贝塞尔曲线
     function bezier(cp, t) {  
         var p1 = cp[0].mul((1 - t) * (1 - t));
         var p2 = cp[1].mul(2 * t * (1 - t));
@@ -11,33 +13,41 @@
         return p1.add(p2).add(p3);
     }  
 
+	// 判断点是否在心形曲线内
     function inheart(x, y, r) {
+		// 笛卡尔坐标系下的心形
         // x^2+(y-(x^2)^(1/3))^2 = 1
         // http://www.wolframalpha.com/input/?i=x%5E2%2B%28y-%28x%5E2%29%5E%281%2F3%29%29%5E2+%3D+1
         var z = ((x / r) * (x / r) + (y / r) * (y / r) - 1) * ((x / r) * (x / r) + (y / r) * (y / r) - 1) * ((x / r) * (x / r) + (y / r) * (y / r) - 1) - (x / r) * (x / r) * (y / r) * (y / r) * (y / r);
         return z < 0;
     }
 
+	// 点的构造函数?
     Point = function(x, y) {
         this.x = x || 0;
         this.y = y || 0;
     }
+	// 点的原型声明
     Point.prototype = {
+		// 拷贝构造函数
         clone: function() {
             return new Point(this.x, this.y);
         },
+		// 两点相加
         add: function(o) {
             p = this.clone();
             p.x += o.x;
             p.y += o.y;
             return p;
         },
+		// 两点相减
         sub: function(o) {
             p = this.clone();
             p.x -= o.x;
             p.y -= o.y;
             return p;
         },
+		// 缩放点的位置
         div: function(n) {
             p = this.clone();
             p.x /= n;
@@ -52,12 +62,16 @@
         }
     }
 
+	// 心的构造函数
+	// 一个心是由一系列点(100个)组成的
     Heart = function() {
+		// 极坐标系下的心形
         // x = 16 sin^3 t
         // y = 13 cos t - 5 cos 2t - 2 cos 3t - cos 4t
         // http://www.wolframalpha.com/input/?i=x+%3D+16+sin%5E3+t%2C+y+%3D+(13+cos+t+-+5+cos+2t+-+2+cos+3t+-+cos+4t)
         var points = [], x, y, t;
         for (var i = 10; i < 30; i += 0.2) {
+			// 这里没有看懂
             t = i / Math.PI;
             x = 16 * Math.pow(Math.sin(t), 3);
             y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
@@ -66,12 +80,15 @@
         this.points = points;
         this.length = points.length;
     }
+	// 心的函数原型声明
     Heart.prototype = {
+		// 获得缩放后心里面的点
         get: function(i, scale) {
             return this.points[i].mul(scale || 1);
         }
     }
 
+	// 种子的构造函数
     Seed = function(tree, point, scale, color) {
         this.tree = tree;
 
@@ -92,11 +109,14 @@
             radius : 5,
         }
     }
+	// 种子的函数原型声明
     Seed.prototype = {
+		// 绘制, 心和文字
         draw: function() {
             this.drawHeart();
             this.drawText();
         },
+		// 两点相加, 
         addPosition: function(x, y) {
             this.cirle.point = this.cirle.point.add(new Point(x, y));
         },
@@ -181,6 +201,7 @@
         hover: function(x, y) {
             var ctx = this.tree.ctx;
             var pixel = ctx.getImageData(x, y, 1, 1);
+			// 目标像素不透明
             return pixel.data[3] == 255
         }
     }
